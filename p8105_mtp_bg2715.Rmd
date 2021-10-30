@@ -130,3 +130,38 @@ knitr::include_graphics("fhp_eop_fig.png")
 ```
 
 Two-panel figure shows 'age_group' is associated with 'eeop_rate' and 'fhp_size_mm'. 'fhp_eop_fig' shows 'fhp_size_mm' is associated with 'eeop_rate'. Presuming 'fhp_size_mm' is exposure of interest and 'eeop_rate' is the outcome. We know 'age_group' is not in the causal pathway between the exposure and outcome. i.e. 'age_group' is the potential confounder.
+
+## Problem 3
+```{r}
+age_df = eop_df %>% 
+  count(age_group, name = "count")
+knitr::kable(age_df)
+```
+The authors’ stated sample sizes in each age group almost consistent with the data I have. The biggest difference in the 41-50 'age_group'. My sample size in that group is seven more than the authors'.
+
+```{r}
+eop_df %>% 
+  group_by(sex) %>%
+  summarise(mu = mean(fhp_size_mm, na.rm = TRUE),
+    sd = sd(fhp_size_mm, na.rm = TRUE))
+```
+Based on above computing on my data, the expectation of FHP size is 23.7 and 28.5 for female and male. The standard deviation of FHP size is 10.6 and 14.7 for female and male, respectively. Rounding this value, we can get similar result as the authors did.
+
+```{r}
+eop_df %>% 
+  filter(eop_size_mm > 10) %>%
+  nrow() / nrow(eop_df)
+```
+Those bony outgrowths were named enlarged EOP (EEOP) only when they have exceeded 10mm in size. I can use 'fhp_size_mm' and sample size to evaluate. The prevalence of EEOP to be 32% in my data, which is close to the authors' one.
+
+```{r}
+eop_df %>% 
+  filter(fhp_size_mm > 40) %>%
+  group_by(age_group) %>%
+  summarise(proportion = n()) %>%
+  mutate(total = pull(age_df, count),
+         proportion = proportion / total) %>%
+  select(-total)
+```
+The broad trend is the same, and the specific value is 2.3% less.
+
