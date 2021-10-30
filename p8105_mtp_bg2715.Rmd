@@ -6,6 +6,8 @@ output: github_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(ggridges)
+library(patchwork)
 #library(rvest)
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -26,12 +28,16 @@ scale_fill_discrete = scale_fill_viridis_d
 ## Problem 1
 Import and clean the data.
 ```{r}
-eop_df = 
-  readxl::read_excel("./p8105_mtp_data.xlsx",  range = "A9:I1230") %>%
+eop_df = readxl::read_excel("./p8105_mtp_data.xlsx",  range = "A9:I1230") %>%
   janitor::clean_names() %>%
   rename(eop_size_type = eop_size) %>%
   replace_na(list(eop_size_mm = 0)) %>%
   replace_na(list(eop_shape = 0)) %>%
+  filter((age_group %in% c(2,3,4,5,6,7,8)),
+         (eop_size_type %in% c(0,1,2,3,4,5)),
+         (fhp_category %in% c(0,1,2,3,4,5,6,7)),
+         (eop_visibility_classification %in% c(0,1,2)),
+         (sex %in% c(0,1))) %>%
   mutate(
     sex = recode(sex, "0" = "female", "1" = "male"
     ),
@@ -51,11 +57,11 @@ eop_df =
                           "6" = "60-70", "7" = "70-80"
     ),
     sex = factor(sex),
+    age_group = factor(age_group),
     eop_size_type = factor(eop_size_type),
     eop_visibility_classification =
       factor(eop_visibility_classification),
-    fhp_category = factor(fhp_category),
-    age_group = factor(age_group),
+    fhp_category = factor(fhp_category)
   )
 
 
@@ -70,7 +76,7 @@ agesex_df = eop_df %>%
   count(sex, name = "count")
 knitr::kable(agesex_df)
 ```
-Different gender have same trend within age groups. 18-30 and 60+ age groups are more than other groups.
+The number of participants in different gender have same trend within age groups. The number of participants in 18-30 and 60+ age groups are greater than other groups.
 ```{r}
 issues_df = 
   readxl::read_excel("./p8105_mtp_data.xlsx",  range = "A9:I1230") %>%
@@ -86,4 +92,35 @@ issues_df =
            )
 knitr::kable(issues_df)
 ```
-There are two observations with age_group 1, one observation with eop_size_type 14.6 and one observation with fhp_category 30.8, which are meaningless. 
+There are two observations with 'age_group' 1, one observation with 'eop_size_type' 14.6 and one observation with 'fhp_category' 30.8, which are meaningless. 
+
+## Problem 2
+```{r}
+fig3 = ggplot(eop_df, aes(x = fhp_size_mm, y = age_group)) + 
+  geom_density_ridges(scale = .85) 
+totalcount = eop_df %>% 
+  count(age_group, name = "total_count")
+
+fig4 = eop_df %>% 
+  filter(eop_size_mm > 10) %>%
+  count(age_group, name = "eeop_rate") %>%
+  mutate(eeop_rate = eeop_rate/pull(totalcount,total_count)) %>%
+  ggplot(aes(x = age_group, y = eeop_rate, group = 1)) +
+  geom_line()
+
+two_panel = fig3/fig4
+ggsave("two-panel.png")
+knitr::include_graphics("two-panel.png")
+```
+
+```{r}
+fhp_eop_fig = eop_df %>% 
+  ggplot(aes(x = fhp_size_mm, y = eop_size_mm, color = sex)) +
+  geom_violin(aes(fill = sex)) +
+  facet_grid(sex ~ age_group)
+
+ggsave("fhp_eop_fig.png")
+knitr::include_graphics("fhp_eop_fig.png")
+```
+
+Two-panel figure shows 'age_group' is associated with 'eeop_rate' and 'fhp_size_mm'. 'fhp_eop_fig' shows 'fhp_size_mm' is associated with 'eeop_rate'. Presuming 'fhp_size_mm' is exposure of interest and 'eeop_rate' is the outcome. We know 'age_group' is not in the causal pathway between the exposure and outcome. i.e. 'age_group' is the potential confounder.
