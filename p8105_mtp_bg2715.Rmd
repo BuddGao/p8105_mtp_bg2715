@@ -99,7 +99,11 @@ There are two observations with 'age_group' 1, one observation with 'eop_size_ty
 fig3 = eop_df %>% 
   mutate(age_group_gender = paste(age_group , sex, sep = '_')) %>%
   ggplot( aes(x = fhp_size_mm, y = age_group_gender)) + 
-  geom_density_ridges(scale = .85) 
+  geom_density_ridges(scale = .85) + 
+  stat_summary(fun = mean, geom = "point", shape = 2) + 
+  stat_summary(fun = sd, geom = "point", shape = 1) +
+  annotate("text",x = 5,y = 0.7,label = "circle for sd, triangle for mean")
+
 totalcount = eop_df %>% 
   count(age_group, name = "total_count")
 
