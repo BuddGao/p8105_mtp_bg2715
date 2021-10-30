@@ -96,7 +96,9 @@ There are two observations with 'age_group' 1, one observation with 'eop_size_ty
 
 ## Problem 2
 ```{r}
-fig3 = ggplot(eop_df, aes(x = fhp_size_mm, y = age_group)) + 
+fig3 = eop_df %>% 
+  mutate(age_group_gender = paste(age_group , sex, sep = '_')) %>%
+  ggplot( aes(x = fhp_size_mm, y = age_group_gender)) + 
   geom_density_ridges(scale = .85) 
 totalcount = eop_df %>% 
   count(age_group, name = "total_count")
@@ -108,7 +110,7 @@ fig4 = eop_df %>%
   ggplot(aes(x = age_group, y = eeop_rate, group = 1)) +
   geom_line()
 
-two_panel = fig3/fig4
+two_panel = fig3 + fig4
 ggsave("two-panel.png")
 knitr::include_graphics("two-panel.png")
 ```
