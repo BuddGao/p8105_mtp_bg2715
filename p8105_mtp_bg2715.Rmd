@@ -24,6 +24,7 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ## Introduction
+Australian researchers reported the relationship between human features and the presence of enlarged external occipital protuberance in 2018. They also thought using cell phone will cause horns" growth. This project will verify the results in the original report by the data accompanying the author correction. 
 
 ## Problem 1
 Import and clean the data.
@@ -129,7 +130,7 @@ ggsave("fhp_eop_fig.png")
 knitr::include_graphics("fhp_eop_fig.png")
 ```
 
-Two-panel figure shows 'age_group' is associated with 'eeop_rate' and 'fhp_size_mm'. 'fhp_eop_fig' shows 'fhp_size_mm' is associated with 'eeop_rate'. Presuming 'fhp_size_mm' is exposure of interest and 'eeop_rate' is the outcome. We know 'age_group' is not in the causal pathway between the exposure and outcome. i.e. 'age_group' is the potential confounder.
+Two-panel figure shows 'age_group' is associated with 'eeop_rate' and 'fhp_size_mm'. 'fhp_eop_fig' shows 'fhp_size_mm' is associated with 'eeop_rate'. Presuming 'fhp_size_mm' is exposure of interest and 'eeop_rate' is the outcome. We know 'age_group' is not in the causal pathway between the exposure and outcome. i.e. 'age_group' is the potential confounder. What's more, age and gender are associated with the presence of EEOP.
 
 ## Problem 3
 ```{r}
@@ -145,7 +146,7 @@ eop_df %>%
   summarise(mu = mean(fhp_size_mm, na.rm = TRUE),
     sd = sd(fhp_size_mm, na.rm = TRUE))
 ```
-Based on above computing on my data, the expectation of FHP size is 23.7 and 28.5 for female and male. The standard deviation of FHP size is 10.6 and 14.7 for female and male, respectively. Rounding this value, we can get similar result as the authors did.
+Based on above computing on my data, the expectation of FHP size is 23.7 and 28.5 for female and male. The standard deviation of FHP size is 10.6 and 14.7 for female and male, respectively. Rounding this value, we can get similar results as the authors did.
 
 ```{r}
 eop_df %>% 
@@ -165,3 +166,5 @@ eop_df %>%
 ```
 The broad trend is the same, and the specific value is 2.3% less.
 
+## Problem 4
+Based on above results,  age, gender and FHP size play significant role in predicting the presence of EEOP. It's same as the results in the original report. Our specific values are slight difference due to the different data processing. I don't think the data provide evidence that cell phones are causing horn growth. To address it, we need data to prove the relationship between using cell phone/posture and FHP size.
